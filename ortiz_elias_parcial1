@@ -1,26 +1,343 @@
 
-/* Parcial 1 
-* Asignatura: Logica  de programacion II
-*
-*/
 
-OBJETIVO 
+// LOGICA DE PROGRAMACION DE COMPUTADORES II
+// Parcial 1 - Sistema de reportes hospitalario
+// Universidad Autónoma de Asunción - Facultad de Ciencias y Tecnología
 
-Generar  un resumen de atencion por tipo , especialiadad , dias y turno . 
-Generar otro informe con la cantidad de pacientes por tipo de atencion , con totales por turno , fecha , especialidad y generales.
-
-
+OBJETIVO
+Generar dos informes del archivo ATENCION con cortes de control y resumen matricial
 
 ENTORNO
+CON_ESPECIALIDAD_ANT      es alfanumerico
+CON_FECHA_ANT             es numerico
+CON_TURNO_ANT             es numerico
+CON_CONTADOR_PAGINA       es numerico
+CON_LINEA                 es numerico
 
+// Contadores para cortes de control
+CON_CONSULTA_TURNO        es numerico
+CON_EMERGENCIA_TURNO      es numerico
+CON_CONTROL_TURNO         es numerico
 
+CON_CONSULTA_FECHA        es numerico
+CON_EMERGENCIA_FECHA      es numerico
+CON_CONTROL_FECHA         es numerico
 
+CON_CONSULTA_ESPEC        es numerico
+CON_EMERGENCIA_ESPEC      es numerico
+CON_CONTROL_ESPEC         es numerico
 
+CON_CONSULTA_GEN          es numerico
+CON_EMERGENCIA_GEN        es numerico
+CON_CONTROL_GEN           es numerico
+
+// MATRIZ para informe 1: [5 especialidades][2 rangos días][3 tipos atención][3 turnos]
+MAT_CONTEOS               es numerico [5][2][3][3]
+
+// VECTOR para totales generales del informe matricial
+VEC_TOTAL_GENERAL         es numerico [3]  // Consulta, Emergencia, Control
+
+archivo ATENCION
+registro REG_ATENCION
+    ATN_NRO_DOCUMENTO     es numerico
+    ATN_ESPECIALIDAD      es alfanumerico
+    ATN_FECHA             es numerico
+    ATN_TURNO             es numerico
+    ATN_DIA_SEMANA        es numerico
+    ATN_TIPO_ATENCION     es numerico
+fin_registro
+prefijo ATN
 
 CUERPO PRINCIPAL
+inicio
+    ejecutar PROCESO_INICIAL
+    ejecutar LEER_PRIMER_REGISTRO
+    
+    // CORTES DE CONTROL ANIDADOS (ESPECIALIDAD → FECHA → TURNO)
+    mientras ATN_ESPECIALIDAD <> "ZZZ"
+        ejecutar INICIO_ESPECIALIDAD
+        mientras ATN_ESPECIALIDAD = CON_ESPECIALIDAD_ANT y ATN_ESPECIALIDAD <> "ZZZ"
+            ejecutar INICIO_FECHA
+            mientras ATN_ESPECIALIDAD = CON_ESPECIALIDAD_ANT y ATN_FECHA = CON_FECHA_ANT y ATN_ESPECIALIDAD <> "ZZZ"
+                ejecutar INICIO_TURNO
+                mientras ATN_ESPECIALIDAD = CON_ESPECIALIDAD_ANT y ATN_FECHA = CON_FECHA_ANT y ATN_TURNO = CON_TURNO_ANT y ATN_ESPECIALIDAD <> "ZZZ"
+                    ejecutar PROCESAR_REGISTRO
+                    ejecutar LEER_SIGUIENTE_REGISTRO
+                fin_mientras
+                ejecutar FIN_TURNO
+            fin_mientras
+            ejecutar FIN_FECHA
+        fin_mientras
+        ejecutar FIN_ESPECIALIDAD
+    fin_mientras
+    
+    ejecutar GENERAR_INFORME_MATRICIAL
+    ejecutar PROCESO_FINAL
+fin
 
+RUTINAS
 
+PROCESO_INICIAL:
+    ejecutar ABRIR_ARCHIVO
+    ejecutar INICIALIZAR_CONTADORES
+    ejecutar INICIALIZAR_MATRIZ_VECTOR
+    CON_ESPECIALIDAD_ANT = "ZZZ"
+    CON_FECHA_ANT = 0
+    CON_TURNO_ANT = 0
+    CON_CONTADOR_PAGINA = 1
+    CON_LINEA = 99
+retorno
 
-RUTINAS 
+ABRIR_ARCHIVO:
+    abrir ATENCION
+retorno
 
+INICIALIZAR_CONTADORES:
+    CON_CONSULTA_GEN = 0
+    CON_EMERGENCIA_GEN = 0
+    CON_CONTROL_GEN = 0
+retorno
 
+INICIALIZAR_MATRIZ_VECTOR:
+    // Inicializar matriz 5x2x3x3
+    para CON_I = 1 hasta 5
+        para CON_J = 1 hasta 2
+            para CON_K = 1 hasta 3
+                para CON_L = 1 hasta 3
+                    MAT_CONTEOS[CON_I][CON_J][CON_K][CON_L] = 0
+                fin_para
+            fin_para
+        fin_para
+    fin_para
+    
+    // Inicializar vector
+    para CON_I = 1 hasta 3
+        VEC_TOTAL_GENERAL[CON_I] = 0
+    fin_para
+retorno
+
+LEER_PRIMER_REGISTRO:
+    leer ATENCION, REG_ATENCION
+    si eof(ATENCION) entonces
+        ATN_ESPECIALIDAD = "ZZZ"
+    fin_si
+retorno
+
+LEER_SIGUIENTE_REGISTRO:
+    leer ATENCION, REG_ATENCION
+    si eof(ATENCION) entonces
+        ATN_ESPECIALIDAD = "ZZZ"
+    fin_si
+retorno
+
+INICIO_ESPECIALIDAD:
+    CON_ESPECIALIDAD_ANT = ATN_ESPECIALIDAD
+    CON_CONSULTA_ESPEC = 0
+    CON_EMERGENCIA_ESPEC = 0
+    CON_CONTROL_ESPEC = 0
+    ejecutar ENCABEZADO_INFORME2
+retorno
+
+INICIO_FECHA:
+    CON_FECHA_ANT = ATN_FECHA
+    CON_CONSULTA_FECHA = 0
+    CON_EMERGENCIA_FECHA = 0
+    CON_CONTROL_FECHA = 0
+retorno
+
+INICIO_TURNO:
+    CON_TURNO_ANT = ATN_TURNO
+    CON_CONSULTA_TURNO = 0
+    CON_EMERGENCIA_TURNO = 0
+    CON_CONTROL_TURNO = 0
+retorno
+
+PROCESAR_REGISTRO:
+    // ACTUALIZAR MATRIZ 
+    ejecutar ACTUALIZAR_MATRIZ
+    
+    // ACTUALIZAR CONTADORES CORTE DE CONTROL
+    segun ATN_TIPO_ATENCION
+        caso 1: CON_CONSULTA_TURNO = CON_CONSULTA_TURNO + 1
+        caso 2: CON_EMERGENCIA_TURNO = CON_EMERGENCIA_TURNO + 1
+        caso 3: CON_CONTROL_TURNO = CON_CONTROL_TURNO + 1
+    fin_segun
+retorno
+
+ACTUALIZAR_MATRIZ:
+    // INDICES DIRECTOS SIN CONDICIONES INNECESARIAS
+    CON_IND_ESP = ejecutar OBTENER_INDICE_ESPECIALIDAD(ATN_ESPECIALIDAD)
+    CON_IND_RANGO = ejecutar OBTENER_INDICE_RANGO_DIAS(ATN_DIA_SEMANA)
+    CON_IND_TIPO = ATN_TIPO_ATENCION  // Directo: 1,2,3
+    CON_IND_TURNO = ATN_TURNO         // Directo: 1,2,3
+    
+    MAT_CONTEOS[CON_IND_ESP][CON_IND_RANGO][CON_IND_TIPO][CON_IND_TURNO] = 
+    MAT_CONTEOS[CON_IND_ESP][CON_IND_RANGO][CON_IND_TIPO][CON_IND_TURNO] + 1
+retorno
+
+OBTENER_INDICE_ESPECIALIDAD(W_ESPECIALIDAD):
+    // SIN CONDICIONES INNECESARIAS - uso de SEGUN
+    segun W_ESPECIALIDAD
+        caso "100": retornar 1
+        caso "200": retornar 2
+        caso "300": retornar 3
+        caso "400": retornar 4
+        caso "500": retornar 5
+    fin_segun
+retorno
+
+OBTENER_INDICE_RANGO_DIAS(W_DIA_SEMANA):
+    // Solo una condición necesaria
+    si W_DIA_SEMANA >= 1 y W_DIA_SEMANA <= 3 entonces
+        retornar 1  // Lunes a Miércoles
+    sino
+        retornar 2  // Jueves a Domingo
+    fin_si
+retorno
+
+FIN_TURNO:
+    ejecutar IMPRIMIR_LINEA_TURNO
+    CON_CONSULTA_FECHA = CON_CONSULTA_FECHA + CON_CONSULTA_TURNO
+    CON_EMERGENCIA_FECHA = CON_EMERGENCIA_FECHA + CON_EMERGENCIA_TURNO
+    CON_CONTROL_FECHA = CON_CONTROL_FECHA + CON_CONTROL_TURNO
+retorno
+
+FIN_FECHA:
+    ejecutar IMPRIMIR_TOTAL_FECHA
+    CON_CONSULTA_ESPEC = CON_CONSULTA_ESPEC + CON_CONSULTA_FECHA
+    CON_EMERGENCIA_ESPEC = CON_EMERGENCIA_ESPEC + CON_EMERGENCIA_FECHA
+    CON_CONTROL_ESPEC = CON_CONTROL_ESPEC + CON_CONTROL_FECHA
+retorno
+
+FIN_ESPECIALIDAD:
+    ejecutar IMPRIMIR_TOTAL_ESPECIALIDAD
+    CON_CONSULTA_GEN = CON_CONSULTA_GEN + CON_CONSULTA_ESPEC
+    CON_EMERGENCIA_GEN = CON_EMERGENCIA_GEN + CON_EMERGENCIA_ESPEC
+    CON_CONTROL_GEN = CON_CONTROL_GEN + CON_CONTROL_ESPEC
+retorno
+
+ENCABEZADO_INFORME2:
+    si CON_LINEA > 55 entonces
+        CON_CONTADOR_PAGINA = CON_CONTADOR_PAGINA + 1
+        CON_LINEA = 0
+    fin_si
+    
+    imprimir "*** DETALLE DE ATENCIONES POR ESPECIALIDAD, FECHA Y TURNO **    PÁG.: ", CON_CONTADOR_PAGINA
+    imprimir "ESPECIALIDAD          FECHA       TURNO      CONSULTAS   EMERGEN.   CONTROL"
+    imprimir "----------------------------------------------------------------------------"
+    CON_LINEA = 3
+retorno
+
+IMPRIMIR_LINEA_TURNO:
+    si CON_LINEA > 55 entonces
+        ejecutar ENCABEZADO_INFORME2
+    fin_si
+    
+    W_TEXTO_ESPEC = ejecutar OBTENER_NOMBRE_ESPECIALIDAD(CON_ESPECIALIDAD_ANT)
+    W_FECHA_FORMATEADA = ejecutar FORMATEAR_FECHA(CON_FECHA_ANT)
+    W_TEXTO_TURNO = ejecutar OBTENER_NOMBRE_TURNO(CON_TURNO_ANT)
+    
+    // FORMATO EXACTO DEL PDF
+    imprimir W_TEXTO_ESPEC, W_FECHA_FORMATEADA, W_TEXTO_TURNO, CON_CONSULTA_TURNO, CON_EMERGENCIA_TURNO, CON_CONTROL_TURNO
+    CON_LINEA = CON_LINEA + 1
+retorno
+
+IMPRIMIR_TOTAL_FECHA:
+    si CON_LINEA > 55 entonces
+        ejecutar ENCABEZADO_INFORME2
+    fin_si
+    
+    W_FECHA_FORMATEADA = ejecutar FORMATEAR_FECHA(CON_FECHA_ANT)
+    imprimir "-  TOTAL ", W_FECHA_FORMATEADA, CON_CONSULTA_FECHA, CON_EMERGENCIA_FECHA, CON_CONTROL_FECHA
+    CON_LINEA = CON_LINEA + 1
+retorno
+
+IMPRIMIR_TOTAL_ESPECIALIDAD:
+    si CON_LINEA > 55 entonces
+        ejecutar ENCABEZADO_INFORME2
+    fin_si
+    
+    W_TEXTO_ESPEC = ejecutar OBTENER_NOMBRE_ESPECIALIDAD(CON_ESPECIALIDAD_ANT)
+    imprimir "-  TOTAL ESPECIALIDAD ", W_TEXTO_ESPEC, CON_CONSULTA_ESPEC, CON_EMERGENCIA_ESPEC, CON_CONTROL_ESPEC
+    CON_LINEA = CON_LINEA + 1
+    imprimir " "  // línea en blanco
+    CON_LINEA = CON_LINEA + 1
+retorno
+
+IMPRIMIR_TOTAL_GENERAL:
+    imprimir "-  TOTAL GENERAL ", CON_CONSULTA_GEN, CON_EMERGENCIA_GEN, CON_CONTROL_GEN
+retorno
+
+FORMATEAR_FECHA(W_FECHA):
+    // CONVERSIÓN AAAAMMDD → DD/MM/AAAA
+    W_ANIO = trunc(W_FECHA / 10000)
+    W_MES = trunc((W_FECHA % 10000) / 100)
+    W_DIA = W_FECHA % 100
+    retornar W_DIA + "/" + W_MES + "/" + W_ANIO
+retorno
+
+OBTENER_NOMBRE_TURNO(W_TURNO):
+    segun W_TURNO
+        caso 1: retornar "MAÑANA"
+        caso 2: retornar "TARDE"
+        caso 3: retornar "NOCHE"
+    fin_segun
+retorno
+
+OBTENER_NOMBRE_ESPECIALIDAD(W_ESPECIALIDAD):
+    segun W_ESPECIALIDAD
+        caso "100": retornar "CLINICA MEDICA"
+        caso "200": retornar "PEDIATRIA"
+        caso "300": retornar "GINECOLOGIA"
+        caso "400": retornar "CARDIOLOGIA"
+        caso "500": retornar "TRAUMATOLOGIA"
+    fin_segun
+retorno
+
+GENERAR_INFORME_MATRICIAL:
+    ejecutar ENCABEZADO_INFORME1
+    ejecutar IMPRIMIR_CUERPO_MATRICIAL
+    ejecutar IMPRIMIR_TOTAL_GENERAL
+retorno
+
+ENCABEZADO_INFORME1:
+    imprimir "** Resumen de Atenciones por Tipo, Especialidad, Días y Turno **"
+    imprimir "Turno / Tipo Atención         MAÑANA              TARDE              NOCHE              TOTAL"
+    imprimir "                              C  E  C            C  E  C            C  E  C            C  E  C"
+    imprimir "------------------------------------------------------------------------------------------------"
+retorno
+
+IMPRIMIR_CUERPO_MATRICIAL:
+    para CON_IND_ESP = 1 hasta 5
+        ejecutar IMPRIMIR_FILA_ESPECIALIDAD(CON_IND_ESP, 1)  // Lun-Mie
+        ejecutar IMPRIMIR_FILA_ESPECIALIDAD(CON_IND_ESP, 2)  // Jue-Dom
+        ejecutar IMPRIMIR_TOTAL_ESPECIALIDAD_MATRICIAL(CON_IND_ESP)
+    fin_para
+retorno
+
+IMPRIMIR_FILA_ESPECIALIDAD(CON_IND_ESP, CON_IND_RANGO):
+    W_ABREV_ESPEC = ejecutar OBTENER_ABREVIATURA_ESPECIALIDAD(CON_IND_ESP)
+    si CON_IND_RANGO = 1 entonces
+        W_RANGO = "Lunes a Miércoles"
+    sino
+        W_RANGO = "Jueves a Domingo"
+    fin_si
+    
+    imprimir W_ABREV_ESPEC, " - ", W_RANGO
+    // ... completar con valores de MAT_CONTEOS
+retorno
+
+OBTENER_ABREVIATURA_ESPECIALIDAD(CON_IND_ESP):
+    segun CON_IND_ESP
+        caso 1: retornar "CLIN.MÉD."
+        caso 2: retornar "PEDIAT."
+        caso 3: retornar "GINECO."
+        caso 4: retornar "CARDIO."
+        caso 5: retornar "TRAUMA."
+    fin_segun
+retorno
+
+PROCESO_FINAL:
+    cerrar ATENCION
+    imprimir "** FIN DE PROCESO **"
+retorno
