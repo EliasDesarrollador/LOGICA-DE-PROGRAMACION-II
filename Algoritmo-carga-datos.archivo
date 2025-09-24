@@ -1,0 +1,103 @@
+
+// Algoritmo para la carga  de datos  del archivo OPER1 
+
+// Practica de Pseudocodigo
+  /* Hacer un pseudocodigo que permita  la grabacion de  los datos  en el archivo  de operaciones , validando lo siguiente : 
+  - MES:  debe estar entre 1 y 12 
+  - TIPO DE OPERACION :  Debe ser  " C" o "V"
+  -MONTO : Debe ser mayor  a cero .
+   El proceso deber terminar  cuando el operador  pulse  Enter  en el  nro de mes .
+  */
+  OBJETIVO 
+  Carga  y grabacion de  registros en el archivo de operaciones (por dia )
+
+  ENTORNO
+  W_RESPUESTA      es alfanumerico 
+
+    archivo OPER1  
+ registro REG_OPER1
+MES                             es numerico 
+TIPO_OPER                 es alfanumerico 
+IMPORTE                     es numerico
+fin_registro
+prefijo OP1
+
+CUERPO PRINCIPAL
+inicio  
+    ejecutra PROCESO_INICIAL 
+        mientras OP1_MES <> 0
+            ejecutar PROCESO_PRINCIPAL
+        fin_mientras
+        ejecutar PROCESO_FINAL 
+fin 
+
+RUTINAS 
+PROCESO_INICIAL:
+    ejecutar IMPRIMIR_PANTALLA_INICIAL
+    ejecutar ABRIR_ARCHIVO_OPER1
+    ejecutar INGRESAR_NUMERO_MES 
+retorno
+PROCESO_PRINCIPAL:
+    ejecutar INGRESAR_DATO_OPERACION
+    ejecutar GRABAR_REGISTRO_OPER1
+    ejecutar INGRESAR_NUMERO_MES
+retorno
+
+PROCESO_FINAL :
+    ejecutar  CERRAR_ARCHIVO_OPER1
+    imprimir "** FIN DE PROCESO **"
+retorno 
+
+IMPRIMIR_PANTALLA_INICIAL : 
+    imprimir "Carga de operaciones por mes :"
+    imprimir "Nro . de mes (1 -12 ) Enter para terminar  : "
+    imprimir "Tipo de operacion C (compra)  V (venta) : "
+    imprimir " Importe : "
+retorno
+
+ABRIR_ARCHIVO_OPER1: 
+    abrir OPER1 
+retorno
+
+INGRESAR_NUMERO_MES : 
+    repetir 
+        ingresar "Mes (1 a 12 ) o ENTER para fin: " OP1_MES
+    hasta OP1_MES >= 1 y OP1_MES <= 12 
+retorno
+
+INGRESAR_DATO_OPERACION : 
+    ejecutar INGRESAR_TIPO_OPERACION
+    ejecutar INGRESAR_IMPORTE_OPERACION
+retorno
+
+INGRESAR_TIPO_OPERACION :
+    repetir 
+        ingresar "Tipo de operacion C (compra)  V (venta) : " OP1_TIPO_OPER
+    hasta OP1_TIPO_OPER = "C" o OP1_TIPO_OPER = "V"
+retorno
+
+INGRESA_IMPORTE_OPERACION :
+    repetir 
+        ingresar  "Importe (mayor a 0 ) :" , OP1_IMPORTE
+    hasta OP1_IMPORTE > 0
+retorno
+
+GRABAR_REGISTRO_OPER1: 
+    ejecutar INGRESAR_CONFIRMACION 
+        si W_RESPUESTA = "S"
+            grabar  REG_OPER1 
+            imprimir "Registro grabado "
+        fin_si
+retorno
+
+INGRESAR_CONFIRMACION :
+    repetir 
+        ingresar "Confirma grabacion del registro ? S/N : " ,W_RESPUESTA
+    hasta W_RESPUESTA = "S"  or  W_RESPUESTA = "N"
+retorno 
+
+CERRAR_ARCHIVO_OPER1 : 
+    cerrar OPER1
+retorno
+
+

@@ -1,0 +1,37 @@
+
+ // Practica de Pseudocodigo
+ // Cortes de Control
+ // Algoritmo para impresion  del informe  con un corte de control 
+// En base  a los  datos cargados en el algoritmo anterior , elaborar un informe que contenga 
+// los totales de mensuales  de compras y ventas y los totales  generales .
+// Formato de impresion
+//                 INFORME  DE OPERACIONES   POR MES 
+       MES                                         OPERACIONES                          VENTAS 
+       ------------------------------------------------------------------------------------------------
+       01                                                 999.999                                999.999
+       02                                                 999.999                                999.999
+       03                                                 999.999                                999.999
+       .                                                        .                                                .
+       .                                                        .                                                .
+       .                                                        .                                                .
+       07                                                999.999                                999.999
+           TOTAL  GENERAL :             9.999.999                             9.999.999
+
+OBJETIVO 
+   Imprimir  resumen  de operaciones por mes 
+
+ENTORNO 
+W_MES_ANT                      es numerico
+ACU_COMPRAS_GEN        es numerico
+ACU_VENTAS_GEN            es numerico
+ACU_COMPRAS_MES        es numerico
+ACU_VENTAS_MES            es numerico
+
+archivo OPER1
+  registro REG_OPER1
+       MES                  es numerico
+       TIPO_OPER      es alfanumerico
+       IMPORTE          es numerico
+    fin_registro
+prefijo OP1
+
